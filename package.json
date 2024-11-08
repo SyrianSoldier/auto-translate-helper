@@ -1,0 +1,94 @@
+{
+  "name": "auto-translate-helper",
+  "displayName": "auto-translate-helper",
+  "description": "用于react项目中自动国际化",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "auto-translate-helper.translate",
+        "title": "自动国际化"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "auto-translate-helper.translate",
+          "when": "editorTextFocus",
+          "group": "1_modification"
+        }
+      ]
+    },
+    "configuration": {
+      "type": "object",
+      "title": "auto-transalte-helper的配置",
+      "properties": {
+        "auto-translate-helper.languages": {
+          "type": "array",
+          "default": [
+            "zh",
+            "en"
+          ],
+          "description": "添加需要国际化的语言",
+          "items": {
+            "type": "string"
+          }
+        },
+        "auto-translate-helper.localesDir": {
+          "type": "string",
+          "default": "locales",
+          "description": "国际化语言包存放的目录(相对于src的路径)"
+        },
+        "auto-translate-helper.suffix": {
+          "type": "string",
+          "default": "ts",
+          "description": "国际化语言包文件的后缀名, 默认ts"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "test": "vitest",
+    "vscode:prepublish": "yarn run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "@types/babel__generator": "^7.6.8",
+    "@types/babel__traverse": "^7.20.6",
+    "@types/mocha": "^10.0.9",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.95.0",
+    "@typescript-eslint/eslint-plugin": "^8.10.0",
+    "@typescript-eslint/parser": "^8.7.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1",
+    "eslint": "^9.13.0",
+    "html-loader": "^5.1.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.6.3",
+    "webpack": "^5.95.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@babel/generator": "^7.26.2",
+    "@babel/parser": "^7.26.2",
+    "@babel/traverse": "^7.25.9",
+    "@babel/types": "^7.26.0",
+    "@types/md5": "^2.3.5",
+    "@types/nanoid": "^3.0.0",
+    "axios": "^1.7.7",
+    "md5": "^2.3.0",
+    "nanoid": "^5.0.8"
+  }
+}

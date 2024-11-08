@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Translation Table</title>
+  <!-- 占位, 会自动替换VUE_SRC -->
+  <script src="{VUE_SRC}"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      color: #fff;
+      background-color: #3b3b3b;
+    }
+
+    .table-container {
+      margin: auto;
+      /* border-radius: 8px; */
+      overflow: hidden;
+      /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); */
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 12px 15px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+
+    tbody tr:hover {
+      background-color: #e0e0e0;
+      /* 悬停时行背景色 */
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: unset;
+      /* 偶数行背景色 */
+    }
+
+    tbody tr:nth-child(odd) {
+      background-color: unset;
+      /* 奇数行背景色 */
+    }
+
+    th {
+      font-weight: bold;
+    }
+
+    .clickable {
+      cursor: pointer;
+    }
+
+    .delTd {
+      width: 60px;
+    }
+
+    li {
+      list-style-type: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <button id="translateButton" @click="translate">翻译</button>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>原文</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in tabelData" :key="index + item.value">
+            <td @click="jumpTo(item)" class="clickable">{{ item.value }}</td>
+            <td class="delTd">
+              <li @click="deleteRow(index)" class="clickable"><a>删除</a></li>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+  <script>
+    // 获取 VS Code API
+    const vscode = acquireVsCodeApi();
+
+    // 创建 Vue 应用
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          tabelData: [] // 用于存储表格数据
+        }
+      },
+
+      mounted() {
+        window.addEventListener("message", event => {
+          const chineseArr = event.data; // 获取VS Code发送的消息
+          this.tabelData = chineseArr
+        })
+
+        vscode.postMessage({ command: "translateHtmlWantRecieveData" }); // 通知 VS Code HTML 已准备就绪, 可以传递数据
+
+      },
+
+      methods: {
+        jumpTo(item) {
+          vscode.postMessage({
+            command: "jumpTo",
+            payload: { ...item }
+          });
+        },
+        deleteRow(index) {
+          this.tabelData = this.tabelData.filter((_, i) => i !== index);
+        },
+        translate() {
+          vscode.postMessage({ command: "translate", payload: [...this.tabelData] });
+        }
+      }
+    });
+
+
+  </script>
+</body>
+
+</html>

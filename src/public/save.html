@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 占位, 会自动替换VUE_SRC -->
+  <script src="{VUE_SRC}"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      color: #fff;
+      /* background-color: #3b3b3b; */
+    }
+
+    .table-container {
+      margin: auto;
+      /* border-radius: 8px; */
+      overflow: hidden;
+      /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); */
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 12px 15px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+
+    tbody tr:hover {
+      background-color: #e0e0e0;
+      /* 悬停时行背景色 */
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: unset;
+      /* 偶数行背景色 */
+    }
+
+    tbody tr:nth-child(odd) {
+      background-color: unset;
+      /* 奇数行背景色 */
+    }
+
+    th {
+      font-weight: bold;
+    }
+
+    td {
+      font-weight: 400;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <button id="saveButton" @click="onSave">保存</button>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>原文</th>
+            <th>key</th>
+
+            <template v-for="(lang, index) in langs" :key="lang.code">
+              <th>{{ lang.name }}-{{lang.code}}</th>
+              <th>{{ lang.name }}状态</th>
+            </template>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in tabelData" :key="item.key">
+            <td>{{ item.raw }}</td>
+            <td>{{ item.key }}</td>
+
+            <template v-for="(local, index) in item.locales" :key="index">
+              <td>{{ local.value }}</td>
+              <td>{{ getLocalStatus(local.status) }}</td>
+            </template>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // 获取 VS Code API
+    const vscode = acquireVsCodeApi();
+
+
+    // 创建 Vue 应用
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          tabelData: [], // 用于存储表格数据
+          valideLanguages: [], // 用于存储所有支持的语言
+        }
+      },
+
+      computed: {
+        langs() {
+          if (this.tabelData.length === 0) {
+            return []
+          }
+          const selectedLangs = this.tabelData[0].locales.map((loc) => loc.locale)
+
+          return this.valideLanguages.filter((item) => selectedLangs.includes(item.code))
+        }
+      },
+      mounted() {
+        window.addEventListener("message", event => {
+          const data = event.data; // 获取VS Code发送的消息
+          this.tabelData = event.data.translatedChinese
+          this.valideLanguages = event.data.valideLanguages
+        })
+
+        console.log('command: "saveHtmlWantRecieveData"')
+
+        vscode.postMessage({ command: "saveHtmlWantRecieveData" }); // 通知 VS Code HTML 已准备就绪, 可以传递数据
+      },
+
+      methods: {
+        getLocalStatus(local) {
+          switch (local) {
+            case "add":
+              return "新增";
+            case "update":
+              return "更新";
+            case "delete":
+              return "删除";
+            default:
+              return "状态异常";
+          }
+        },
+        onSave() {
+          vscode.postMessage({ command: "save", payload: [...this.tabelData] }); // 通知 VS Code 保存数据
+        }
+      }
+    });
+
+
+
+  </script>
+</body>
+
+</html>
